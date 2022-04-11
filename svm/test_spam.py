@@ -44,8 +44,7 @@ for word, weight in predictors:
 def genExample(f):
     email = open(f).read()
     indices =  spam.processEmail(email)
-    features =  spam.extractFeatures(indices)
-    return features
+    return spam.extractFeatures(indices)
 
 files = [
     'data/emailSample1.txt',

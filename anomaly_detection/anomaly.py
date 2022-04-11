@@ -15,14 +15,8 @@ def F1(predictions, y):
     TP = np.sum((predictions == 1) & (y == 1))
     FP = np.sum((predictions == 1) & (y == 0))
     FN = np.sum((predictions == 0) & (y == 1))
-    if TP + FP == 0:
-        precision = 0
-    else:
-        precision = float(TP) / (TP + FP)
-    if TP + FN == 0:
-        recall = 0
-    else:
-        recall = float(TP) / (TP + FN)
+    precision = 0 if TP + FP == 0 else float(TP) / (TP + FP)
+    recall = 0 if TP + FN == 0 else float(TP) / (TP + FN)
     if precision + recall == 0:
         return 0
     else:

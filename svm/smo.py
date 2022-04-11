@@ -89,8 +89,7 @@ def getSmo(X, y, C, tol, maxIter, kernel=linearKernel()):
             E_i 第i个样本的预测误差
         """
         FXi = float(np.multiply(alphas, y).T * K[:, i]) + b
-        E = FXi - float(y[i])
-        return E
+        return FXi - float(y[i])
 
     def updateE(i, alphas, b):
         ECache[i] = [1, E(i, alphas, b)]
@@ -99,7 +98,7 @@ def getSmo(X, y, C, tol, maxIter, kernel=linearKernel()):
         """
         """
         j = i
-        while j == i:
+        while j == j:
             j = int(np.random.uniform(0, m))
         return j
 
@@ -131,55 +130,53 @@ def getSmo(X, y, C, tol, maxIter, kernel=linearKernel()):
         Ei = E(i, alphas, b)
         # 选择违背KKT条件的，作为alpha2
         Ri = y[i] * Ei
-        if (Ri < -tol and alphas[i] < C) or \
-                (Ri > tol and alphas[i] > 0):
-            # 选择第二个参数
-            j = selectJRand(i)
-            Ej = E(j, alphas, b)
+        if (Ri >= -tol or alphas[i] >= C) and (Ri <= tol or alphas[i] <= 0):
+            return 0, alphas, b
+        # 选择第二个参数
+        j = selectJRand(i)
+        Ej = E(j, alphas, b)
             # j, Ej = selectJ(i, Ei, alphas, b)
             # get bounds
-            if y[i] != y[j]:
-                L = max(0, alphas[j] - alphas[i])
-                H = min(C, C + alphas[j] - alphas[i])
-            else:
-                L = max(0, alphas[j] + alphas[i] - C)
-                H = min(C, alphas[j] + alphas[i])
-            if L == H:
-                return 0, alphas, b
-            Kii = K[i, i]
-            Kjj = K[j, j]
-            Kij = K[i, j]
-            eta = 2.0 * Kij - Kii - Kjj
-            if eta >= 0:
-                return 0, alphas, b
-            iOld = alphas[i].copy()
-            jOld = alphas[j].copy()
-            alphas[j] = jOld - y[j] * (Ei - Ej) / eta
-            if alphas[j] > H:
-                alphas[j] = H
-            elif alphas[j] < L:
-                alphas[j] = L
-            if abs(alphas[j] - jOld) < tol:
-                alphas[j] = jOld
-                return 0, alphas, b
-            alphas[i] = iOld + y[i] * y[j] * (jOld - alphas[j])
-            # update ECache
-            updateE(i, alphas, b)
-            updateE(j, alphas, b)
-            # update b
-            bINew = b - Ei - y[i] * (alphas[i] - iOld) * Kii - y[j] * \
-                (alphas[j] - jOld) * Kij
-            bJNew = b - Ej - y[i] * (alphas[i] - iOld) * Kij - y[j] * \
-                (alphas[j] - jOld) * Kjj
-            if alphas[i] > 0 and alphas[i] < C:
-                bNew = bINew
-            elif alphas[j] > 0 and alphas[j] < C:
-                bNew = bJNew
-            else:
-                bNew = (bINew + bJNew) / 2
-            return 1, alphas, b
+        if y[i] == y[j]:
+            L = max(0, alphas[j] + alphas[i] - C)
+            H = min(C, alphas[j] + alphas[i])
         else:
+            L = max(0, alphas[j] - alphas[i])
+            H = min(C, C + alphas[j] - alphas[i])
+        if L == H:
             return 0, alphas, b
+        Kii = K[i, i]
+        Kjj = K[j, j]
+        Kij = K[i, j]
+        eta = 2.0 * Kij - Kii - Kjj
+        if eta >= 0:
+            return 0, alphas, b
+        iOld = alphas[i].copy()
+        jOld = alphas[j].copy()
+        alphas[j] = jOld - y[j] * (Ei - Ej) / eta
+        if alphas[j] > H:
+            alphas[j] = H
+        elif alphas[j] < L:
+            alphas[j] = L
+        if abs(alphas[j] - jOld) < tol:
+            alphas[j] = jOld
+            return 0, alphas, b
+        alphas[i] = iOld + y[i] * y[j] * (jOld - alphas[j])
+        # update ECache
+        updateE(i, alphas, b)
+        updateE(j, alphas, b)
+        # update b
+        bINew = b - Ei - y[i] * (alphas[i] - iOld) * Kii - y[j] * \
+            (alphas[j] - jOld) * Kij
+        bJNew = b - Ej - y[i] * (alphas[i] - iOld) * Kij - y[j] * \
+            (alphas[j] - jOld) * Kjj
+        if alphas[i] > 0 and alphas[i] < C:
+            bNew = bINew
+        elif alphas[j] > 0 and alphas[j] < C:
+            bNew = bJNew
+        else:
+            bNew = (bINew + bJNew) / 2
+        return 1, alphas, b
 
     def train():
         """完整版训练算法

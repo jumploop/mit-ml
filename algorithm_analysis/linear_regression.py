@@ -59,21 +59,15 @@ def gradient(X, y, rate=1, maxLoop=50, epsilon=1e-1, theLambda=0, initTheta=None
     """
     m, n = X.shape
     # 初始化theta
-    if initTheta is None:
-        theta = np.zeros((n, 1))
-    else:
-        theta = initTheta
+    theta = np.zeros((n, 1)) if initTheta is None else initTheta
     count = 0
     converged = False
     error = float('inf')
     errors = []
-    for i in range(maxLoop):
+    for _ in range(maxLoop):
         theta = theta + (1.0 / m) * rate * ((y - X * theta).T * X).T
         error = J(theta, X, y, theLambda)
-        if np.isnan(error) is True:
-            error = np.inf
-        else:
-            error = error[0, 0]
+        error = np.inf if np.isnan(error) is True else error[0, 0]
         errors.append(error)
         # 如果已经收敛
         if(error < epsilon):
@@ -94,10 +88,7 @@ def standardize(X):
         features = X[:,j]
         meanVal = features.mean(axis=0)
         std = features.std(axis=0)
-        if std != 0:
-            X[:, j] = (features-meanVal)/std
-        else:
-            X[:, j] = 0
+        X[:, j] = (features-meanVal)/std if std != 0 else 0
     return X
 
 def normalize(X):
@@ -115,10 +106,7 @@ def normalize(X):
         minVal = features.min(axis=0)
         maxVal = features.max(axis=0)
         diff = maxVal - minVal
-        if diff != 0:
-           X[:,j] = (features-minVal)/diff
-        else:
-           X[:,j] = 0
+        X[:,j] = (features-minVal)/diff if diff != 0 else 0
     return X
 
 def getLearningCurves(X, y, Xval, yval, rate=1, maxLoop=50, epsilon=0.1, theLambda=0):
@@ -138,8 +126,8 @@ def getLearningCurves(X, y, Xval, yval, rate=1, maxLoop=50, epsilon=0.1, theLamb
     trainErrors = np.zeros((1,m))
     valErrors = np.zeros((1,m))
     for i in range(m):
-        Xtrain = X[0:i+1]
-        ytrain = y[0:i+1]
+        Xtrain = X[:i+1]
+        ytrain = y[:i+1]
         res, timeConsumed = gradient(
             Xtrain, ytrain, rate=rate, maxLoop=maxLoop, epsilon=epsilon,theLambda=theLambda)
         theta, errors = res

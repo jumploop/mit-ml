@@ -57,8 +57,8 @@ def diagnoseLR():
     trainErrors = np.zeros((1,m))
     valErrors = np.zeros((1,m))
     for i in range(m):
-        Xtrain = X[0:i+1]
-        ytrain = y[0:i+1]
+        Xtrain = X[:i+1]
+        ytrain = y[:i+1]
         res, timeConsumed = linear_regression.gradient(
             Xtrain, ytrain, rate=0.001, maxLoop=5000, epsilon=0.1)
         theta, errors = res

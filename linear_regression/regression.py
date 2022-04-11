@@ -31,10 +31,8 @@ def loadDataSet(filename):
     y = []
     file = open(filename)
     for line in file.readlines():
-        lineArr = []
         curLine = line.strip().split('\t')
-        for i in range(numFeat):
-            lineArr.append(float(curLine[i]))
+        lineArr = [float(curLine[i]) for i in range(numFeat)]
         X.append(lineArr)
         y.append(float(curLine[-1]))
     return np.mat(X), np.mat(y).T
@@ -86,13 +84,9 @@ def bgd(rate, maxLoop, epsilon, X, y):
     converged = False
     error = float('inf')
     errors = []
-    thetas = {}
-    for j in range(n):
-        thetas[j] = [theta[j,0]]
-    while count<=maxLoop:
-        if(converged):
-            break
-        count = count + 1
+    thetas = {j: [theta[j,0]] for j in range(n)}
+    while count <= maxLoop and not converged:
+        count += 1
         for j in range(n):
             deriv = (y-X*theta).T*X[:, j]/m
             theta[j,0] = theta[j,0]+rate*deriv
@@ -123,13 +117,9 @@ def sgd(rate, maxLoop, epsilon, X, y):
     converged = False
     error = float('inf')
     errors = []
-    thetas = {}
-    for j in range(n):
-        thetas[j] = [theta[j,0]]
-    while count <= maxLoop:
-        if converged:
-            break
-        count = count + 1
+    thetas = {j: [theta[j,0]] for j in range(n)}
+    while count <= maxLoop and not converged:
+        count += 1
         errors.append(float('inf'))
         for i in range(m):
             if converged:
@@ -186,14 +176,10 @@ def lwr(rate, maxLoop, epsilon, X, y, x, c=1):
     converged = False
     error = float('inf')
     errors = []
-    thetas = {}
-    for j in range(n):
-        thetas[j] = [theta[j,0]]
+    thetas = {j: [theta[j,0]] for j in range(n)}
     # 执行批量梯度下降
-    while count<=maxLoop:
-        if(converged):
-            break
-        count = count + 1
+    while count <= maxLoop and not converged:
+        count += 1
         for j in range(n):
             deriv = (y-X*theta).T*X[:, j]/m
             theta[j,0] = theta[j,0]+rate*deriv
@@ -219,10 +205,7 @@ def standarize(X):
         features = X[:,j]
         meanVal = features.mean(axis=0)
         std = features.std(axis=0)
-        if std != 0:
-            X[:, j] = (features-meanVal)/std
-        else:
-            X[:, j] = 0
+        X[:, j] = (features-meanVal)/std if std != 0 else 0
     return X
 
 def normalize(X):
@@ -240,8 +223,5 @@ def normalize(X):
         minVal = features.min(axis=0)
         maxVal = features.max(axis=0)
         diff = maxVal - minVal
-        if diff != 0:
-           X[:,j] = (features-minVal)/diff
-        else:
-           X[:,j] = 0
+        X[:,j] = (features-minVal)/diff if diff != 0 else 0
     return X

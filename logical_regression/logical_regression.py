@@ -33,10 +33,8 @@ def loadDataSet(filename):
     y = []
     file = open(filename)
     for line in file.readlines():
-        lineArr = []
         curLine = line.strip().split('\t')
-        for i in range(numFeat):
-            lineArr.append(float(curLine[i]))
+        lineArr = [float(curLine[i]) for i in range(numFeat)]
         X.append([1.0, float(lineArr[0]), float(lineArr[1])])
         y.append(float(curLine[-1]))
     return np.mat(X), np.mat(y).T
@@ -153,5 +151,4 @@ def predictOneVsAll(X,Thetas):
     Returns：
         H 预测结果
     """
-    H = sigmoid(Thetas * X.T)
-    return H
+    return sigmoid(Thetas * X.T)

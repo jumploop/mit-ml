@@ -19,7 +19,7 @@ if __name__ == "__main__":
     for k in range(clusterCount):
         # 绘制聚类中心
         ax.scatter(centroids[k,0], centroids[k,1], color='r', marker='+', linewidth=20)
-        for i in range(m):
+        for _ in range(m):
             # 绘制属于该聚类中心的样本
             ptsInCluster = dataMat[np.nonzero(clusterAssment[:, 0].A==k)[0]]
             ax.scatter(ptsInCluster[:, 0].flatten().A[0], ptsInCluster[:, 1].flatten().A[0], marker=patterns[k], color=colors[k])

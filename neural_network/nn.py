@@ -26,7 +26,7 @@ def initThetas(hiddenNum, unitNum, inputSize, classNum, epsilon):
     Returns:
         Thetas 权值矩阵序列
     """
-    hiddens = [unitNum for i in range(hiddenNum)]
+    hiddens = [unitNum for _ in range(hiddenNum)]
     units = [inputSize] + hiddens + [classNum]
     Thetas = []
     for idx, unit in enumerate(units):
@@ -89,10 +89,7 @@ def gradientCheck(Thetas,X,y,theLambda):
         gradApprox[i] = (JPlus-JMinus) / (2*epsilon)
     # 用欧氏距离表示近似程度
     diff = np.linalg.norm(gradApprox - DVec)
-    if diff < 1e-2:
-        return True
-    else:
-        return False
+    return diff < 1e-2
 
 def adjustLabels(y):
     """校正分类标签
@@ -103,21 +100,21 @@ def adjustLabels(y):
         yAdjusted 校正后的标签集
     """
     # 保证标签对类型的标识是逻辑标识
-    if y.shape[1] == 1:
-        classes = set(np.ravel(y))
-        classNum = len(classes)
-        minClass = min(classes)
-        if classNum > 2:
-            yAdjusted = np.zeros((y.shape[0], classNum), np.float64)
-            for row, label in enumerate(y):
-                yAdjusted[row, label - minClass] = 1
-        else:
-            yAdjusted = np.zeros((y.shape[0], 1), np.float64)
-            for row, label in enumerate(y):
-                if label != minClass:
-                    yAdjusted[row, 0] = 1.0
-        return yAdjusted
-    return y
+    if y.shape[1] != 1:
+        return y
+    classes = set(np.ravel(y))
+    classNum = len(classes)
+    minClass = min(classes)
+    if classNum > 2:
+        yAdjusted = np.zeros((y.shape[0], classNum), np.float64)
+        for row, label in enumerate(y):
+            yAdjusted[row, label - minClass] = 1
+    else:
+        yAdjusted = np.zeros((y.shape[0], 1), np.float64)
+        for row, label in enumerate(y):
+            if label != minClass:
+                yAdjusted[row, 0] = 1.0
+    return yAdjusted
 
 
 def unroll(matrixes):
@@ -204,7 +201,7 @@ def bp(Thetas, a, y, theLambda):
         else:
             # 忽略偏置
             d[l] = np.multiply((Thetas[l][:,1:].T * d[l + 1]), sigmoidDerivative(a[l][1:, :]))
-    for l in layers[0:layerNum - 1]:
+    for l in layers[:layerNum - 1]:
         delta[l] = d[l + 1] * (a[l].T)
     D = [np.zeros(Theta.shape) for Theta in Thetas]
     for l in range(len(Thetas)):
